@@ -1,0 +1,14 @@
+# Core runtime
+ultralytics>=8.2.0
+torch>=2.2.0
+opencv-python>=4.8.0.76
+numpy>=1.24.0
+pandas>=2.0.0
+matplotlib>=3.7.0
+PyYAML>=6.0
+tqdm>=4.65.0
+
+# Optional (uncomment if your crawl_images.py needs them)
+# requests>=2.31.0
+# beautifulsoup4>=4.12.0
+# aiohttp>=3.9.0
