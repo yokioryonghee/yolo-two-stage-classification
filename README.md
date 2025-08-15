@@ -2,7 +2,9 @@
 
 This repo provides an **end-to-end two-stage pipeline**:
 1) **Detector** (YOLO): uses a pretrained detection model (`--det_weights`, e.g., `yolov8n.pt`) to find objects.
-2) **Classifier** (seed-based): classifies **cropped car regions** into fine-grained classes (e.g., model/trim).
+2) https://github.com/ultralytics/assets/releases/download/v8.1.0/yolov8n.pt
+
+3) **Classifier** (seed-based): classifies **cropped car regions** into fine-grained classes (e.g., model/trim).
 
 The pipeline supports two modes:
 
