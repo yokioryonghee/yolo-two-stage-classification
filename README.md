@@ -25,7 +25,7 @@ data/
   queries.txt             # crawl mode queries
 runs/                     # training outputs (ignored by git)
 ```
-![Uploading 스크린샷 2025-07-23 16.27.05.png…]()
+
 ## Installation
 
 ```bash
