@@ -12,3 +12,13 @@ tqdm>=4.65.0
 # requests>=2.31.0
 # beautifulsoup4>=4.12.0
 # aiohttp>=3.9.0
+
+#streamlit(branch: streamlit-webrtc)
+streamlit>=1.33
+streamlit-webrtc>=0.47
+aiortc>=1.6
+av>=10.0.0
+opencv-python>=4.8
+ultralytics>=8.2
+numpy>=1.24
+requests>=2.31
