@@ -106,6 +106,17 @@ To **skip crawling** and still run the rest, prefer **seed mode** with your own 
   ```bash
   git checkout -b feature/streamlit-ui
   ```
+
+<img width="1710" height="1107" alt="Image" src="https://github.com/user-attachments/assets/0d8e4bf4-93b6-455c-9d4e-2d6f2f8eab93" />
+<img width="1710" height="1107" alt="Image" src="https://github.com/user-attachments/assets/9be70370-582c-427f-81ea-fbdce3899517" />
+<img width="1710" height="1107" alt="Image" src="https://github.com/user-attachments/assets/afc0ac22-59a0-4dd9-8281-f9a8b2cb48cc" />
+<img width="1710" height="1107" alt="Image" src="https://github.com/user-attachments/assets/d7d22b75-8bdb-404b-a3d4-fef016dc03c0" />
+<img width="1710" height="1107" alt="Image" src="https://github.com/user-attachments/assets/e9cca82f-dab3-4d87-992d-fb00473533f1" />
+<img width="1710" height="1107" alt="Image" src="https://github.com/user-attachments/assets/8f0787a3-c5cb-49fd-a1b8-a64e474a39e4" />
+<img width="1710" height="1107" alt="Image" src="https://github.com/user-attachments/assets/6f3175c2-7b8a-4ed0-96ed-7115045db20d" />
+<img width="1710" height="1107" alt="Image" src="https://github.com/user-attachments/assets/79690d22-198d-497c-8eb6-e30b2c4c51f6" />
+<img width="1710" height="1107" alt="Image" src="https://github.com/user-attachments/assets/3802f565-28be-435b-a049-9fe2290f9dcd" />
+<img width="1710" height="1107" alt="Image" src="https://github.com/user-attachments/assets/4a321c39-fad3-429d-9511-2a0a813c6681" 
 <img width="3000" height="2250" alt="Image" src="https://github.com/user-attachments/assets/f3f5aae0-18e3-45de-ae34-f97fd7db480d" />
 
 <img width="3000" height="2250" alt="Image" src="https://github.com/user-attachments/assets/e5700771-e8eb-4cdd-8194-b647bd6b532b" />
