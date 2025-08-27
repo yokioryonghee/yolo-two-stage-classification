@@ -106,7 +106,11 @@ To **skip crawling** and still run the rest, prefer **seed mode** with your own 
   ```bash
   git checkout -b feature/streamlit-ui
   ```
+<img width="3000" height="2250" alt="Image" src="https://github.com/user-attachments/assets/f3f5aae0-18e3-45de-ae34-f97fd7db480d" />
 
+<img width="3000" height="2250" alt="Image" src="https://github.com/user-attachments/assets/e5700771-e8eb-4cdd-8194-b647bd6b532b" />
+
+<img width="1200" height="1200" alt="Image" src="https://github.com/user-attachments/assets/8d19c3f5-5b1e-40bf-841b-26e1cb0cdab2" />
 ## License
 
 MIT (change as needed).
