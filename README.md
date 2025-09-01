@@ -1,5 +1,7 @@
 pip install imagehash
+
 pip install imagehash
+
 pip install duckduckgo-search(I forgot  👁️👁️)
                                           
 Full training can be time-consuming. To get started quickly, use the quick-start (pretrained) setup with the weights provided in weights/.
