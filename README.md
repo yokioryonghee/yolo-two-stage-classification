@@ -1,3 +1,8 @@
+pip install duckduckgo-search(I forgot  👁️👁️)
+                                         🫦
+
+
+
 # Two-Stage Vehicle Pipeline (YOLO Detect + Classify)
 
 This repo provides an **end-to-end two-stage pipeline**:
