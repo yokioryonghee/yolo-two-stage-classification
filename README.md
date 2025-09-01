@@ -1,6 +1,7 @@
 pip install duckduckgo-search(I forgot  👁️👁️)
                                           
-
+Full training can be time-consuming. To get started quickly, use the quick-start (pretrained) setup with the weights provided in weights/.
+Note: the checkpoint currently covers 8 vehicle classes. Adding more classes and retraining should improve performance.
 
 
 # Two-Stage Vehicle Pipeline (YOLO Detect + Classify)
