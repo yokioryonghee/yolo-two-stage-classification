@@ -3,9 +3,13 @@ pip install imagehash
 pip install imagehash
 
 pip install duckduckgo-search(I forgot  👁️👁️)
+
+
                                           
 Full training can be time-consuming. To get started quickly, use the quick-start (pretrained) setup with the weights provided in weights/.
 Note: the checkpoint currently covers 8 vehicle classes. Adding more classes and retraining should improve performance.
+
+Best:  crawl vehicle's images what you want to train in the seed folder, and run two_stage_infer.py
 
 
 # Two-Stage Vehicle Pipeline (YOLO Detect + Classify)
