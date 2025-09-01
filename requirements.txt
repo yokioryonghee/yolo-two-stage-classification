@@ -8,6 +8,10 @@ matplotlib>=3.7.0
 PyYAML>=6.0
 tqdm>=4.65.0
 
+duckduckgo-search
+
+imagehash
+
 # Optional (uncomment if your crawl_images.py needs them)
 # requests>=2.31.0
 # beautifulsoup4>=4.12.0
