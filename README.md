@@ -120,7 +120,7 @@ To **skip crawling** and still run the rest, prefer **seed mode** with your own 
   ```bash
   git checkout -b feature/streamlit-ui
   ```
-!The model was trained on a limited dataset, consisting of only a few dozen images for each of the 8 specific car models. While it accurately detects these trained vehicles, it may incorrectly identify or misclassify car types it has not been exposed to. We are currently working on an automated pipeline to streamline the entire process, from data crawling and training to weight updates.
+!The model was trained on a limited dataset, consisting of only a few dozen images for each of the 8 specific car models. While it accurately detects these trained vehicles, it may incorrectly identify or misclassify car types it has not been exposed to. I am currently working on an automated pipeline to streamline the entire process, from data crawling and training to weight updates.
 
 
 <img width="1710" height="1107" alt="Image" src="https://github.com/user-attachments/assets/0d8e4bf4-93b6-455c-9d4e-2d6f2f8eab93" />
