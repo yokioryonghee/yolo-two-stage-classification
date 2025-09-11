@@ -139,8 +139,7 @@ To **skip crawling** and still run the rest, prefer **seed mode** with your own 
 <img width="1710" height="1107" alt="Image" src="https://github.com/user-attachments/assets/d7d22b75-8bdb-404b-a3d4-fef016dc03c0" />
 <img width="1710" height="1107" alt="Image" src="https://github.com/user-attachments/assets/e9cca82f-dab3-4d87-992d-fb00473533f1" />
 <img width="1710" height="1107" alt="Image" src="https://github.com/user-attachments/assets/8f0787a3-c5cb-49fd-a1b8-a64e474a39e4" />
-<img width="1710" height="1107" alt="Image" src="https://github.com/user-attachments/assets/6f3175c2-7b8a-4ed0-96ed-7115045db20d" />
-<img width="1710" height="1107" alt="Image" src="https://github.com/user-attachments/assets/79690d22-198d-497c-8eb6-e30b2c4c51f6" />
+
 
 
 
