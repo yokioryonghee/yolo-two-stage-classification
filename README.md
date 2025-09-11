@@ -1,8 +1,18 @@
-pip install imagehash
+
+
+This is an early-stage fine-tuned YOLOv8n model designed for:
+- Car model detection 
+- Automotive parts classification
+
+Note: This is not a tutorial-level copy-paste project, but an advanced ML implementation.(I guess?🤔)
+
+
+
 
 pip install imagehash
 
 pip install duckduckgo-search(I forgot  👁️👁️)
+(I added them in the requirements.txt now, but just in case, leave those commands here)
 
 
                                           
