@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 import argparse
+import hashlib
+import json
 from pathlib import Path
 import cv2
 from ultralytics import YOLO
@@ -42,7 +44,9 @@ def main():
                 crop = im[max(0,y1):y2, max(0,x1):x2]
                 if crop.size==0 or min(crop.shape[:2]) < args.min_side:
                     continue
-                cv2.imwrite(str(out_dir/f"{p.stem}_{i}.jpg"), crop)
+                target=out_dir/f"{p.stem}_{i}.jpg"
+                if not cv2.imwrite(str(target),crop): raise OSError(f'Cannot write {target}')
+                target.with_suffix('.jpg.source.json').write_text(json.dumps({'source_sha256':hashlib.sha256(p.read_bytes()).hexdigest()}))
 
 if __name__ == "__main__":
     main()

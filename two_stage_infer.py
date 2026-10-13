@@ -25,6 +25,7 @@ def parse_args():
     ap.add_argument("--source", type=str, default="0", help="0/1... for webcam index, or video/rtsp/http path")
     ap.add_argument("--device", type=str, default="mps", help="cpu|mps|cuda (auto-fallback if unavailable)")
     ap.add_argument("--conf", type=float, default=0.35, help="detector confidence threshold")
+    ap.add_argument("--cls_conf", type=float, default=0.6, help="Below this score, label unknown")
     ap.add_argument("--show", action="store_true", help="imshow window")
     ap.add_argument("--save", action="store_true", help="save output video")
     ap.add_argument("--save_path", type=str, default="runs/two_stage/out.mp4", help="output video path")
@@ -132,6 +133,7 @@ def main():
                 break
             continue
 
+        original_frame = frame.copy()
         r0 = rlist[0]
 
         # Robust empty-handling (no numpy-vs-list comparison!)
@@ -173,7 +175,7 @@ def main():
 
             # (B) 차량이면 2단계 분류
             if int(cid) in VEHICLE_CLASS_IDS_COCO:
-                crop = crop_box(frame, xyxy, pad=args.pad)
+                crop = crop_box(original_frame, xyxy, pad=args.pad)
                 if crop is None or min(crop.shape[:2]) < 32:
                     continue
 
@@ -192,7 +194,9 @@ def main():
                     top_p = float(c0.probs.top1conf)
                     model_name = c0.names.get(top_idx, str(top_idx))
 
-                # 분류 라벨은 감지 라벨 위쪽에 색 다르게 추가
+                if top_p < args.cls_conf:
+                    model_name = "unknown"
+                # Classification score threshold is a heuristic, not calibrated OOD detection.
                 cv2.putText(
                     frame,
                     f"→ {model_name} {top_p:.2f}",
@@ -236,3 +240,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+

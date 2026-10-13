@@ -1,1 +1,10 @@
-data/seed*/
+.venv/
+__pycache__/
+*.pyc
+.DS_Store
+data/
+runs/
+*.pt
+.pytest_cache/
+artifacts/
+ml_model/

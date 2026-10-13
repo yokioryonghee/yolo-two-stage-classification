@@ -21,7 +21,8 @@ def imread_rgb(path: Path):
 def imwrite_rgb(path: Path, rgb):
     path.parent.mkdir(parents=True, exist_ok=True)
     bgr = cv2.cvtColor(rgb, cv2.COLOR_RGB2BGR)
-    cv2.imwrite(str(path), bgr, [cv2.IMWRITE_JPEG_QUALITY, 92])
+    if not cv2.imwrite(str(path), bgr, [cv2.IMWRITE_JPEG_QUALITY, 92]):
+        raise OSError(f'Cannot write {path}')
 
 # -----------------------------
 # Augmentations tuned for webcam-like noise
@@ -100,69 +101,32 @@ def augment_once(img):
 # -----------------------------
 # Main
 # -----------------------------
+def build_augmented(src,dst,imgsz=224,val_ratio=.2,multiplier=12,seed=42):
+    from dataset_tools import split_sources,stage_directory,publish,clean_stage
+    import hashlib
+    src,dst=Path(src).resolve(),Path(dst).resolve()
+    if src==dst or src in dst.parents or dst in src.parents: raise ValueError('Separate source/output directories required')
+    if imgsz<32 or multiplier<0: raise ValueError('Invalid image size/multiplier')
+    assignments=split_sources(src,val_ratio,seed)
+    random.seed(seed); np.random.seed(seed)
+    stage=stage_directory(dst); manifest=[]
+    try:
+        for path,(cls,split,group) in assignments.items():
+            image=imread_rgb(path)
+            if image is None: raise ValueError(f'Unreadable image: {path}')
+            image=cv2.resize(image,(imgsz,imgsz),interpolation=cv2.INTER_AREA)
+            stem=hashlib.sha256(str(path.relative_to(src)).encode()).hexdigest()
+            images=[image]+([augment_once(image) for _ in range(multiplier)] if split=='train' else [])
+            for i,value in enumerate(images):
+                target=stage/split/cls/f'{stem}_{i}.jpg'; imwrite_rgb(target,value)
+                manifest.append(dict(source=str(path.relative_to(src)),group=group,split=split,output=str(target.relative_to(stage))))
+        return manifest,publish(stage,dst,manifest)
+    finally: clean_stage(stage)
+
 def main():
-    ap = argparse.ArgumentParser()
-    ap.add_argument("--src", default="data/seed", help="seed images per class")
-    ap.add_argument("--dst", default="data/dataset", help="output dataset (ImageFolder)")
-    ap.add_argument("--imgsz", type=int, default=224)
-    ap.add_argument("--val_ratio", type=float, default=0.2)
-    ap.add_argument("--multiplier", type=int, default=12, help="augmented images per seed train image")
-    args = ap.parse_args()
-
-    src = Path(args.src)
-    dst = Path(args.dst)
-    (dst / "train").mkdir(parents=True, exist_ok=True)
-    (dst / "val").mkdir(parents=True, exist_ok=True)
-
-    classes = [d.name for d in src.iterdir() if d.is_dir()]
-    if not classes:
-        raise RuntimeError(f"No classes found in {src}")
-
-    rng = random.Random(42)
-
-    for cls in sorted(classes):
-        src_dir = src / cls
-        files = [p for p in src_dir.glob("*") if p.suffix.lower() in (".jpg", ".jpeg", ".png")]
-        rng.shuffle(files)
-
-        if not files:
-            print(f"[{cls}] no seed images, skip.")
-            continue
-
-        k = int(len(files) * (1 - args.val_ratio))
-        k = max(1, min(k, len(files) - 1)) if len(files) >= 2 else 1  # ensure both split have at least 1 if possible
-        train_files = files[:k]
-        val_files = files[k:]
-
-        # val: copy resized, no augmentation
-        val_out = dst / "val" / cls
-        val_out.mkdir(parents=True, exist_ok=True)
-        v_ok = 0
-        for p in val_files:
-            im = imread_rgb(p)
-            if im is None:
-                continue
-            im = cv2.resize(im, (args.imgsz, args.imgsz), interpolation=cv2.INTER_AREA)
-            imwrite_rgb(val_out / f"{p.stem}.jpg", im)
-            v_ok += 1
-
-        # train: original + augmented N
-        train_out = dst / "train" / cls
-        train_out.mkdir(parents=True, exist_ok=True)
-        t_ok = 0
-        for p in train_files:
-            im0 = imread_rgb(p)
-            if im0 is None:
-                continue
-            im0 = cv2.resize(im0, (args.imgsz, args.imgsz), interpolation=cv2.INTER_AREA)
-            imwrite_rgb(train_out / f"{p.stem}_orig.jpg", im0)
-            t_ok += 1
-            for i in range(args.multiplier):
-                imi = augment_once(im0)
-                imwrite_rgb(train_out / f"{p.stem}_a{i}.jpg", imi)
-                t_ok += 1
-
-        print(f"[{cls}] seed:{len(files)}  -> train:{t_ok}  val:{v_ok}")
-
-if __name__ == "__main__":
-    main()
+    p=argparse.ArgumentParser(); p.add_argument('--src',default='data/seed'); p.add_argument('--dst',default='data/dataset')
+    p.add_argument('--imgsz',type=int,default=224); p.add_argument('--val_ratio',type=float,default=.2)
+    p.add_argument('--multiplier',type=int,default=12); p.add_argument('--seed',type=int,default=42)
+    a=p.parse_args(); manifest,backup=build_augmented(a.src,a.dst,a.imgsz,a.val_ratio,a.multiplier,a.seed)
+    print(f'Created {len(manifest)} files; previous dataset: {backup}')
+if __name__=='__main__': main()
