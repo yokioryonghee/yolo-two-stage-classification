@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 import argparse
+import hashlib
+import json
 from pathlib import Path
+from dataset_tools import stage_directory,publish
 import cv2
 from ultralytics import YOLO
 
@@ -18,7 +21,12 @@ def main():
 
     model = YOLO(args.det_weights)
 
-    Path(args.dst).mkdir(parents=True, exist_ok=True)
+    final_dst=Path(args.dst).resolve()
+    source=Path(args.src).resolve()
+    if source==final_dst or source in final_dst.parents or final_dst in source.parents:
+        raise ValueError('Separate source/output directories required')
+    stage=stage_directory(final_dst)
+    args.dst=str(stage)
 
     for cls_dir in Path(args.src).iterdir():
         if not cls_dir.is_dir():
@@ -42,7 +50,11 @@ def main():
                 crop = im[max(0,y1):y2, max(0,x1):x2]
                 if crop.size==0 or min(crop.shape[:2]) < args.min_side:
                     continue
-                cv2.imwrite(str(out_dir/f"{p.stem}_{i}.jpg"), crop)
+                target=out_dir/f"{p.stem}_{i}.jpg"
+                if not cv2.imwrite(str(target),crop): raise OSError(f'Cannot write {target}')
+                target.with_suffix('.jpg.source.json').write_text(json.dumps({'source_sha256':hashlib.sha256(p.read_bytes()).hexdigest()}))
+
+    publish(stage,final_dst,{'source':str(source)})
 
 if __name__ == "__main__":
     main()
