@@ -1,152 +1,58 @@
+# Two-stage vehicle classification
 
+YOLO detector로 차량 영역을 찾고 별도로 학습한 classifier로 차종을 분류합니다. 원본 이미지 수집, 검사, crop, 분할, 학습과 카메라/영상 추론을 연결합니다.
 
-This is an early-stage fine-tuned YOLOv8n model designed for:
-- Car model detection 
-- Automotive parts classification
+## 설치
 
-Note: This is not a tutorial-level copy-paste project, but an advanced ML implementation.(I guess?🤔)
-
-
-
-
-pip install imagehash
-
-pip install duckduckgo-search(I forgot  👁️👁️)
-(I added them in the requirements.txt now, but just in case, leave those commands here)
-
-
-                                          
-Full training can be time-consuming. To get started quickly, use the quick-start (pretrained) setup with the weights provided in weights/.
-Note: the checkpoint currently covers 8 vehicle classes. Adding more classes and retraining should improve performance.
-
-Best:  crawl vehicle's images what you want to train in the seed folder, and run two_stage_infer.py
-
-
-# Two-Stage Vehicle Pipeline (YOLO Detect + Classify)
-
-This repo provides an **end-to-end two-stage pipeline**:
-1) **Detector** (YOLO): uses a pretrained detection model (`--det_weights`, e.g., `yolov8n.pt`) to find objects.
-2) https://github.com/ultralytics/assets/releases/download/v8.1.0/yolov8n.pt
-
-3) **Classifier** (seed-based): classifies **cropped car regions** into fine-grained classes (e.g., model/trim).
-
-The pipeline supports two modes:
-
-- `crawl` mode: web image crawl → verify → detect&crop → split → train classifier → infer
-- `seed` mode: **use your own seed images** → augment → train classifier → infer (no crawling)
-
-> The detector is **not retrained** here; only the **classifier** is retrained in `seed` mode.
-
-## Project Tree (key files)
-```
-run_all.py                # main orchestration (seed/crawl)
-augment_dataset.py        # build dataset from seed with augmentations
-verify_images.py          # (crawl mode) basic filtering
-crop_from_raw.py          # (crawl mode) detect & crop ROIs
-split_dataset.py          # create train/val splits
-two_stage_infer.py        # real-time 2-stage inference
-train_classifier.sh       # trains classifier (Ultralytics classify)
-data/
-  seed/                   # your seed images (class-per-folder)
-  queries.txt             # crawl mode queries
-runs/                     # training outputs (ignored by git)
-```
-
-## Installation
+Python 3.11 이상을 사용합니다.
 
 ```bash
-# (Recommended) create a venv
 python3 -m venv .venv
-source .venv/bin/activate  # Windows: .venv\Scripts\activate
-
-pip install --upgrade pip
-pip install -r requirements.txt
+source .venv/bin/activate
+python -m pip install -r requirements.txt
 ```
 
-**PyTorch note (macOS MPS/Apple Silicon):** the `torch` wheel installed via `pip` runs with MPS if available (no extra CUDA setup required).
+Windows에서는 `.\.venv\Scripts\Activate.ps1`로 활성화합니다.
 
-## Quickstart (Seed Mode: no crawling)
+## Seed 이미지로 학습
 
-1) Prepare seed images (class-per-folder):
-```
-data/seed_cars/
-  Avante/
-    img001.jpg ...
-  Sonata/
-    ...
-```
-
-2) Run seed mode (aug → train classifier → infer):
-```bash
-python run_all.py \
-  --mode seed \
-  --seed_dir data/seed_cars \
-  --imgsz 224 \
-  --val_ratio 0.2 \
-  --aug_multiplier 12 \
-  --det_weights yolov8n.pt \
-  --conf 0.35 \
-  --source 0
-```
-
-After training, the latest classifier checkpoint is auto-picked from `runs/classify/*/weights/best.pt` and used by `two_stage_infer.py` together with the detector.
-
-### Only re-run inference with an existing classifier
-```bash
-python run_all.py --mode seed --seed_dir data/seed_cars --skip_train --det_weights yolov8n.pt --conf 0.35
-```
-(Requires an existing `runs/classify/.../best.pt`).
-
-## Crawl Mode (optional, if you want to build data automatically)
+`data/seed_cars/차종이름/사진.jpg` 형태로 독립적인 사진을 클래스마다 두 장 이상 준비합니다. 동일 사진의 복제본은 독립 표본으로 세지 않습니다.
 
 ```bash
-python run_all.py \
-  --mode crawl \
-  --queries data/queries.txt \
-  --per_class 500 \
-  --det_weights yolov8n.pt \
-  --conf 0.35
+python run_all.py --mode seed --seed_dir data/seed_cars --device cpu
 ```
-This will run:
-- `crawl_images.py` → `verify_images.py` → `crop_from_raw.py` → `split_dataset.py` → `train_classifier.sh`
 
-To **skip crawling** and still run the rest, prefer **seed mode** with your own `seed_dir`.
+Apple Silicon에서는 `--device mps`, CUDA 환경에서는 `--device cuda:0`을 사용합니다. 옵션을 생략하면 CUDA, MPS, CPU 순으로 선택합니다. 모델의 최초 다운로드에는 인터넷이 필요합니다.
 
-## Webcam / iPhone camera input
+같은 원본은 하나의 분할에만 포함하고, 원본 분할 후 학습 이미지에만 증강을 적용합니다. 재실행은 새 데이터셋을 만들어 교체하며 기존 폴더는 `dataset.previous-...`로 보존합니다. `manifest.json`에 원본 그룹과 분할을 기록합니다.
 
-- `--source` accepts typical OpenCV sources (e.g., `0` for default webcam).
-- On macOS with iPhone, Continuity Camera exposes `iPhone Camera` as a webcam-like source in many apps. If you want to stream into this pipeline, you can also use USB solutions like Camo/EpocCam, or Wi‑Fi (NDI/WebRTC) depending on your setup.
+## 이미 학습한 모델로 추론
 
-## Reproducibility
+```bash
+python run_all.py --skip_train --cls_weights runs/classify/car_model/weights/best.pt --source 0 --device cpu
+```
 
-- Training parameters are logged to `args.yaml` under `runs/classify/<exp-name>/`.
-- Typical defaults (from `args.yaml`): `epochs=30`, `batch=32`, `imgsz=224`, `val_ratio=0.2`, `pretrained=true`, `device=mps` (auto).
+`--source`는 카메라 번호 또는 영상 경로입니다. `--no_show`는 창을 띄우지 않습니다. 학습 완료 시 이번 학습의 checkpoint를 사용합니다. 기존 모델 추론 시 checkpoint를 직접 지정해야 합니다.
 
-## Tips
+`--cls_conf` 기본값은 0.6입니다. 그보다 낮은 classifier 점수에는 unknown을 표시합니다. 이 임계값은 미학습 차종을 확실히 구분하는 검증된 방법은 아닙니다. detection 표시를 그리기 전 원본 frame에서 classifier 입력을 잘라냅니다.
 
-- Keep large artifacts out of Git (see `.gitignore` below).
-- Share pretrained weights and sample data via GitHub Releases or external storage.
-- For Streamlit UI later, create a new branch:
-  ```bash
-  git checkout -b feature/streamlit-ui
-  ```
-!The model was trained on a limited dataset, consisting of only a few dozen images for each of the 8 specific car models. While it accurately detects these trained vehicles, it may incorrectly identify or misclassify car types it has not been exposed to. I am currently working on an automated pipeline to streamline the entire process, from data crawling and training to weight updates.
+## 이미지 검색으로 데이터 준비
 
+`data/queries.txt`에 `클래스명<TAB>검색어`를 적습니다.
 
-<img width="1710" height="1107" alt="Image" src="https://github.com/user-attachments/assets/0d8e4bf4-93b6-455c-9d4e-2d6f2f8eab93" />
-<img width="1710" height="1107" alt="Image" src="https://github.com/user-attachments/assets/9be70370-582c-427f-81ea-fbdce3899517" />
-<img width="1710" height="1107" alt="Image" src="https://github.com/user-attachments/assets/afc0ac22-59a0-4dd9-8281-f9a8b2cb48cc" />
-<img width="1710" height="1107" alt="Image" src="https://github.com/user-attachments/assets/d7d22b75-8bdb-404b-a3d4-fef016dc03c0" />
-<img width="1710" height="1107" alt="Image" src="https://github.com/user-attachments/assets/e9cca82f-dab3-4d87-992d-fb00473533f1" />
-<img width="1710" height="1107" alt="Image" src="https://github.com/user-attachments/assets/8f0787a3-c5cb-49fd-a1b8-a64e474a39e4" />
+```bash
+python run_all.py --mode crawl --queries data/queries.txt --per_class 300 --device cpu
+```
 
+검색 결과의 라벨은 검색어에서 가져옵니다. 잘못된 차종·동일 차량·유사 사진을 검수해야 합니다. 한 원본의 여러 차량 crop은 같은 source group으로 분할합니다.
 
+## 테스트와 성능 평가
 
+```bash
+python -m pip install pytest
+python -m pytest -q
+```
 
+테스트는 데이터셋 재실행, 원본 그룹 분리, 학습 전용 증강과 device/checkpoint 전달을 확인합니다. 모델 재학습이나 실제 카메라 품질 검증을 대신하지 않습니다.
 
-<img width="3000" height="2250" alt="Image" src="https://github.com/user-attachments/assets/e5700771-e8eb-4cdd-8194-b647bd6b532b" />
-
-<img width="1200" height="1200" alt="Image" src="https://github.com/user-attachments/assets/8d19c3f5-5b1e-40bf-841b-26e1cb0cdab2" />
-## License
-
-MIT (change as needed).
+차종별 정확도·confusion matrix, 독립 촬영 test set, 미학습 차종 오분류와 지연 시간을 별도 평가해야 합니다. 현재 저장소는 이러한 결과를 입증하지 않습니다.
